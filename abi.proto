@@ -1,0 +1,100 @@
+syntax = "proto3";
+
+package abi;
+
+// command request from client
+message commandRequest {
+    oneof request_data {
+        Hget hget = 1;
+        Hgetall hgetall = 2;
+        Hmget hmget = 3;
+        Hset hset = 4;
+        Hmset hmset = 5;
+        Hdel hdel = 6;
+        Hmdel hmdel = 7;
+        Hexist hexist = 8;
+        Hmexist hmexist = 9;
+    }
+}
+
+// response from server
+message CommandResponse {
+    // status code, re-use HTTP status code like 2xx/4xx/5xx
+    uint32 status = 1;
+    // used when status code != 2xx, detail error message
+    string message = 2;
+    // returned values
+    repeated Value values = 3;
+    // returned kv pairs
+    repeated Kvpair pairs = 4;
+}
+
+// use a key to get a value from a table
+message Hget {
+    string table = 1;
+    string key = 2;
+}
+
+// get all the Kvpairs from a table
+message Hgetall {
+    string table = 1;
+}
+
+// use a list of keys, to get their values from a table
+message Hmget {
+    string table = 1;
+    repeated string keys = 2;
+}
+
+// returned value
+message Value {
+    oneof value {
+        string string = 1;
+        bytes binary = 2;
+        int64 integer = 3;
+        double float = 4;
+        bool bool = 5;
+    }
+}
+
+// returned Kvpair
+message Kvpair {
+    string key = 1;
+    Value value = 2;
+}
+
+// save a Kvpair into a table
+message Hset {
+    string table = 1;
+    Kvpair pair = 2;
+}
+
+// save a list of Kvpairs into a table
+message Hmset {
+    string table = 1;
+    repeated Kvpair pairs = 2;
+}
+
+// delete a key from a table, return the former value
+message Hdel {
+    string table = 1;
+    string key = 2;
+}
+
+// delete a list of keys from a table, return their former values
+message Hmdel {
+    string table = 1;
+    repeated string keys = 2;
+}
+
+// check if key exist in a table
+message Hexist {
+    string table = 1;
+    string key = 2;
+}
+
+// check if a list of keys exist in a table
+message Hmexist {
+    string table = 1;
+    repeated string keys = 2;
+}

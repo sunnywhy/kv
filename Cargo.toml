@@ -1,0 +1,20 @@
+[package]
+name = "kv"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bytes = "1" # handle the network buffer
+prost = "0.9" # handle protobuf
+tracing = "0.1" # handle logging
+
+[dev-dependencies]
+anyhow = "1" # handle error
+async-prost = "0.3.0" # support wrap protobuf into TCP frame
+futures = "0.3" # supply Stream trait
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "io-util", "macros", "net"]}
+
+[build-dependencies]
+prost-build = { version = "0.9" }
