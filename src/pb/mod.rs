@@ -4,7 +4,7 @@ use abi::{command_request::RequestData, *};
 
 impl CommandRequest {
     // create HSET command
-    pub fn new_hset(table: impl Into<String>, key: impl Into<String>, value: Value) -> CommandRequest {
+    pub fn new_hset(table: impl Into<String>, key: impl Into<String>, value: Value) -> Self {
         Self { 
             request_data: Some(RequestData::Hset(Hset { 
                 table: table.into(),
