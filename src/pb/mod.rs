@@ -5,10 +5,29 @@ use abi::{command_request::RequestData, *};
 impl CommandRequest {
     // create HSET command
     pub fn new_hset(table: impl Into<String>, key: impl Into<String>, value: Value) -> Self {
-        Self { 
-            request_data: Some(RequestData::Hset(Hset { 
+        Self {
+            request_data: Some(RequestData::Hset(Hset {
                 table: table.into(),
                 pair: Some(Kvpair::new(key, value)),
+            })),
+        }
+    }
+
+    // create HGET command
+    pub fn new_hget(table: impl Into<String>, key: impl Into<String>) -> Self {
+        Self {
+            request_data: Some(RequestData::Hget(Hget {
+                table: table.into(),
+                key: key.into(),
+            })),
+        }
+    }
+
+    // create HGETALL command
+    pub fn new_hgetall(table: impl Into<String>) -> Self {
+        Self {
+            request_data: Some(RequestData::Hgetall(Hgetall {
+                table: table.into(),
             })),
         }
     }
@@ -32,8 +51,8 @@ impl From<String> for Value {
     }
 }
 
-/// convert to Value from &str 
-impl  From<&str> for Value {
+/// convert to Value from &str
+impl From<&str> for Value {
     fn from(s: &str) -> Self {
         Self {
             value: Some(value::Value::String(s.into())),
