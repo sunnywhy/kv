@@ -14,7 +14,7 @@ pub trait Storage {
     fn del(&self, table: &str, key: &str) -> Result<Option<Value>, KvError>;
     /// get all the kv pairs from a table
     fn get_all(&self, table: &str) -> Result<Vec<Kvpair>, KvError>;
-    /// get a Iterator for returning kv pair 
+    /// get a Iterator for returning kv pair
     fn get_iter(&self, table: &str) -> Result<Box<dyn Iterator<Item = Kvpair>>, KvError>;
 }
 
@@ -45,12 +45,12 @@ mod tests {
         let v = store.set("t1", "hello".into(), "world".into());
         assert!(v.unwrap().is_none());
 
-        // set the same key, it will update and return the former value 
+        // set the same key, it will update and return the former value
         let v1 = store.set("t1", "hello".into(), "world1".into());
         assert_eq!(v1, Ok(Some("world".into())));
 
         // get existing key will get the latest value
-        let  v = store.get("t1", "hello");
+        let v = store.get("t1", "hello");
         assert_eq!(v, Ok(Some("world1".into())));
 
         // get non-existing key/table will get None
@@ -62,7 +62,7 @@ mod tests {
         assert_eq!(store.contains("t1", "hello1"), Ok(false));
         assert_eq!(store.contains("t2", "hello"), Ok(false));
 
-        // del existing key will return the former value 
+        // del existing key will return the former value
         let v = store.del("t1", "hello");
         assert_eq!(v, Ok(Some("world1".into())));
 
@@ -78,7 +78,7 @@ mod tests {
         let mut data = store.get_all("t2").unwrap();
         data.sort_by(|a, b| a.partial_cmp(b).unwrap());
         assert_eq!(
-            data, 
+            data,
             vec![
                 Kvpair::new("k1", "v1".into()),
                 Kvpair::new("k2", "v2".into())
@@ -93,7 +93,7 @@ mod tests {
         let mut data: Vec<_> = store.get_iter("t2").unwrap().collect();
         data.sort_by(|a, b| a.partial_cmp(b).unwrap());
         assert_eq!(
-            data, 
+            data,
             vec![
                 Kvpair::new("k1", "v1".into()),
                 Kvpair::new("k2", "v2".into())

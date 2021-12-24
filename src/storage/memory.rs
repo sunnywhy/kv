@@ -1,4 +1,3 @@
-
 use crate::{KvError, Kvpair, Storage, Value};
 use dashmap::{mapref::one::Ref, DashMap};
 
@@ -16,7 +15,7 @@ impl MemTable {
     /// if the table with name doesn't exist, create it, otherwise return it
     fn get_or_create_table(&self, name: &str) -> Ref<String, DashMap<String, Value>> {
         match self.tables.get(name) {
-            Some(table) => table, 
+            Some(table) => table,
             None => {
                 let entry = self.tables.entry(name.into()).or_default();
                 entry.downgrade()
@@ -48,7 +47,10 @@ impl Storage for MemTable {
 
     fn get_all(&self, table: &str) -> Result<Vec<Kvpair>, KvError> {
         let table = self.get_or_create_table(table);
-        Ok(table.iter().map(|v| Kvpair::new(v.key(), v.value().clone())).collect())
+        Ok(table
+            .iter()
+            .map(|v| Kvpair::new(v.key(), v.value().clone()))
+            .collect())
     }
 
     fn get_iter(&self, table: &str) -> Result<Box<dyn Iterator<Item = Kvpair>>, KvError> {

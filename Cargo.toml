@@ -10,6 +10,7 @@ bytes = "1" # handle the network buffer
 prost = "0.9" # handle protobuf
 thiserror = "1" # error defination and handling
 dashmap = "5" # concurrent hash map
+http = "0.2" # import this to use HTTP status code
 tracing = "0.1" # handle logging
 
 [dev-dependencies]
