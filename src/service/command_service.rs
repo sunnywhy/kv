@@ -35,7 +35,7 @@ impl CommandService for Hset {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{command_request::RequestData, service::{assert_res_ok, assert_res_error}};
+    use crate::{service::{assert_res_ok, assert_res_error, dispatch}};
 
     #[test]
     fn hset_should_work() {
@@ -88,15 +88,4 @@ mod tests {
         assert_res_ok(res, &[], pairs);
     }
 
-    // get Response from the Request, currently support HGET/HSET/HGETALL
-    fn dispatch(cmd: CommandRequest, store: &impl Storage) -> CommandResponse {
-        match cmd.request_data.unwrap() {
-            RequestData::Hset(v) => v.execute(store),
-            RequestData::Hget(v) => v.execute(store),
-            RequestData::Hgetall(v) => v.execute(store),
-            _ => todo!(),
-        }
-    }
-
-    
 }

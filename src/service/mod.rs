@@ -1,6 +1,8 @@
 use std::sync::Arc;
 
-use crate::{Storage, CommandResponse, MemTable};
+use tracing::debug;
+
+use crate::{Storage, CommandResponse, MemTable, CommandRequest, command_request::RequestData, KvError};
 
 
 mod command_service;
@@ -15,15 +17,49 @@ pub struct Service<Store = MemTable> {
     inner: Arc<ServiceInner<Store>>,
 }
 
+impl<Store> Clone for Service<Store> {
+    fn clone(&self) -> Self {
+        Self { 
+            inner: Arc::clone(&self.inner),
+        }
+    }
+}
+
 pub struct ServiceInner<Store> {
     store: Store,
+}
+
+impl<Store: Storage> Service<Store> {
+    pub fn new(store: Store) -> Self {
+        Self { 
+            inner: Arc::new(ServiceInner { store: store})
+        }
+    }
+
+    pub fn execute(&self, cmd: CommandRequest) -> CommandResponse {
+        debug!("Got request: {:?}", cmd);
+        let res =dispatch(cmd, &self.inner.store);
+        debug!("Executed response: {:?}", res);
+        // TODO: emit on_executed event
+
+        res
+    }
+}
+
+fn dispatch(cmd: CommandRequest, store: &impl Storage) -> CommandResponse {
+    match cmd.request_data {
+        Some(RequestData::Hget(param)) => param.execute(store),
+        Some(RequestData::Hgetall(param)) => param.execute(store),
+        Some(RequestData::Hset(param)) => param.execute(store),
+        _ => KvError::Internal("Not implemented".into()).into(),
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use std::thread;
 
-    use crate::{CommandRequest, Value};
+    use crate::{Value};
 
     use super::*;
     
