@@ -2,8 +2,9 @@ use std::sync::Arc;
 
 use tracing::debug;
 
-use crate::{Storage, CommandResponse, MemTable, CommandRequest, command_request::RequestData, KvError};
-
+use crate::{
+    command_request::RequestData, CommandRequest, CommandResponse, KvError, MemTable, Storage,
+};
 
 mod command_service;
 
@@ -19,7 +20,7 @@ pub struct Service<Store = MemTable> {
 
 impl<Store> Clone for Service<Store> {
     fn clone(&self) -> Self {
-        Self { 
+        Self {
             inner: Arc::clone(&self.inner),
         }
     }
@@ -31,14 +32,14 @@ pub struct ServiceInner<Store> {
 
 impl<Store: Storage> Service<Store> {
     pub fn new(store: Store) -> Self {
-        Self { 
-            inner: Arc::new(ServiceInner { store: store})
+        Self {
+            inner: Arc::new(ServiceInner { store }),
         }
     }
 
     pub fn execute(&self, cmd: CommandRequest) -> CommandResponse {
         debug!("Got request: {:?}", cmd);
-        let res =dispatch(cmd, &self.inner.store);
+        let res = dispatch(cmd, &self.inner.store);
         debug!("Executed response: {:?}", res);
         // TODO: emit on_executed event
 
@@ -59,10 +60,10 @@ fn dispatch(cmd: CommandRequest, store: &impl Storage) -> CommandResponse {
 mod tests {
     use std::thread;
 
-    use crate::{Value};
+    use crate::Value;
 
     use super::*;
-    
+
     #[test]
     fn service_should_work() {
         // we need a service to include the Storage
@@ -71,7 +72,7 @@ mod tests {
         // service should able to run in multiple threads
         let cloned = service.clone();
 
-        // create a new thread, insert k1 and k2 into table t1 
+        // create a new thread, insert k1 and k2 into table t1
         let handle = thread::spawn(move || {
             let res = cloned.execute(CommandRequest::new_hset("t1", "k1", "v1".into()));
             assert_res_ok(res, &[Value::default()], &[]);
@@ -86,7 +87,7 @@ mod tests {
 }
 
 #[cfg(test)]
-use crate::{Value, Kvpair};
+use crate::{Kvpair, Value};
 #[cfg(test)]
 fn assert_res_ok(mut res: CommandResponse, values: &[Value], pairs: &[Kvpair]) {
     res.pairs.sort_by(|a, b| a.partial_cmp(b).unwrap());

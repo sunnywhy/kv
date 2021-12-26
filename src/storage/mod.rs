@@ -25,7 +25,7 @@ mod tests {
     #[test]
     fn memtable_basic_interface_should_work() {
         let store = MemTable::new();
-        test_basi_interface(store);
+        test_basic_interface(store);
     }
 
     #[test]
@@ -40,7 +40,7 @@ mod tests {
     //     test_get_iter(store);
     // }
 
-    fn test_basi_interface(store: impl Storage) {
+    fn test_basic_interface(store: impl Storage) {
         // first set will create the table, insert key, and return None
         let v = store.set("t1", "hello".into(), "world".into());
         assert!(v.unwrap().is_none());

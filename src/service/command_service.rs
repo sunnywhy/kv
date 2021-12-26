@@ -21,13 +21,13 @@ impl CommandService for Hgetall {
 
 impl CommandService for Hset {
     fn execute(self, store: &impl Storage) -> CommandResponse {
-        match self.pair{
-            Some(v) => match store.set(&self.table, v.key, v. value.unwrap_or_default()){
+        match self.pair {
+            Some(v) => match store.set(&self.table, v.key, v.value.unwrap_or_default()) {
                 Ok(Some(v)) => v.into(),
                 Ok(None) => Value::default().into(),
                 Err(e) => e.into(),
-            }, 
-            None => Value::default().into(),                                          
+            },
+            None => Value::default().into(),
         }
     }
 }
@@ -35,7 +35,7 @@ impl CommandService for Hset {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{service::{assert_res_ok, assert_res_error, dispatch}};
+    use crate::service::{assert_res_error, assert_res_ok, dispatch};
 
     #[test]
     fn hset_should_work() {
@@ -87,5 +87,4 @@ mod tests {
         ];
         assert_res_ok(res, &[], pairs);
     }
-
 }

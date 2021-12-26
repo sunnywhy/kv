@@ -100,8 +100,8 @@ impl From<KvError> for CommandResponse {
         let mut result = Self {
             status: StatusCode::INTERNAL_SERVER_ERROR.as_u16() as _,
             message: e.to_string(),
-            values: vec![], 
-            pairs: vec![]
+            values: vec![],
+            pairs: vec![],
         };
 
         match e {
