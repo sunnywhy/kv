@@ -32,6 +32,20 @@ impl CommandService for Hset {
     }
 }
 
+impl CommandService for Hmget {
+    fn execute(self, store: &impl Storage) -> CommandResponse {
+        let mut result = vec![];
+        for key in self.keys {
+            match store.get(&self.table, &key) {
+                Ok(Some(v)) => result.push(v),
+                Ok(None) => result.push(Value::default()),
+                Err(_) => result.push(Value::default()),
+            }
+        }
+        result.into()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -64,6 +78,18 @@ mod tests {
         let cmd = CommandRequest::new_hget("score", "u1");
         let res = dispatch(cmd, &store);
         assert_res_error(res, 404, "Not found");
+    }
+
+    #[test]
+    fn hmget_should_work() {
+        let store = MemTable::new();
+        let cmd = CommandRequest::new_hset("score", "u1", 10.into());
+        dispatch(cmd, &store);
+        let cmd = CommandRequest::new_hset("score", "u2", 8.into());
+        dispatch(cmd, &store);
+        let cmd = CommandRequest::new_hmget("score", vec!["u1".into(), "u2".into()]);
+        let res = dispatch(cmd, &store);
+        assert_res_ok(res, &[10.into(), 8.into()], &[]);
     }
 
     #[test]
