@@ -54,6 +54,8 @@ fn dispatch(cmd: CommandRequest, store: &impl Storage) -> CommandResponse {
         Some(RequestData::Hset(param)) => param.execute(store),
         Some(RequestData::Hmget(param)) => param.execute(store),
         Some(RequestData::Hmset(param)) => param.execute(store),
+        Some(RequestData::Hdel(param)) => param.execute(store),
+        Some(RequestData::Hmdel(param)) => param.execute(store),
         _ => KvError::Internal("Not implemented".into()).into(),
     }
 }

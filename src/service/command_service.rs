@@ -60,6 +60,30 @@ impl CommandService for Hmset {
     }
 }
 
+impl CommandService for Hdel {
+    fn execute(self, store: &impl Storage) -> CommandResponse {
+        match store.del(&self.table, &self.key) {
+            Ok(Some(v)) => v.into(),
+            Ok(None) => KvError::NotFound(self.table, self.key).into(),
+            Err(e) => e.into(),
+        }
+    }
+}
+
+impl CommandService for Hmdel {
+    fn execute(self, store: &impl Storage) -> CommandResponse {
+        let mut result = vec![];
+        for key in self.keys {
+            match store.del(&self.table, &key) {
+                Ok(Some(v)) => result.push(v),
+                Ok(None) => result.push(Value::default()),
+                Err(_) => result.push(Value::default()),
+            }
+        }
+        result.into()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -137,5 +161,33 @@ mod tests {
 
         let res = dispatch(cmd, &store);
         assert_res_ok(res, &["world".into(), 10.into()], &[]);
+    }
+
+    #[test]
+    fn hdel_should_work() {
+        let store = MemTable::new();
+        let cmd = CommandRequest::new_hset("score", "u1", 10.into());
+        dispatch(cmd, &store);
+        let cmd = CommandRequest::new_hdel("score", "u1");
+        let res = dispatch(cmd.clone(), &store);
+        assert_res_ok(res, &[10.into()], &[]);
+
+        let res = dispatch(cmd, &store);
+        assert_res_error(res, 404, "Not found");
+    }
+
+    #[test]
+    fn hmdel_should_work() {
+        let store = MemTable::new();
+        let cmd = CommandRequest::new_hset("score", "u1", 10.into());
+        dispatch(cmd, &store);
+        let cmd = CommandRequest::new_hset("score", "u2", 8.into());
+        dispatch(cmd, &store);
+        let cmd = CommandRequest::new_hmdel("score", vec!["u1".into(), "u2".into()]);
+        let res = dispatch(cmd.clone(), &store);
+        assert_res_ok(res, &[10.into(), 8.into()], &[]);
+
+        let res = dispatch(cmd, &store);
+        assert_res_ok(res, &[Value::default(), Value::default()], &[]);
     }
 }
