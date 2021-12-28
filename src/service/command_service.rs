@@ -84,6 +84,30 @@ impl CommandService for Hmdel {
     }
 }
 
+impl CommandService for Hexist {
+    fn execute(self, store: &impl Storage) -> CommandResponse {
+        let value: Value = match store.contains(&self.table, &self.key) {
+            Ok(true) => true.into(),
+            _ => false.into(),
+        };
+        value.into()
+    }
+}
+
+impl CommandService for Hmexist {
+    fn execute(self, store: &impl Storage) -> CommandResponse {
+        let mut result = vec![];
+        for key in self.keys {
+            let value: Value = match store.contains(&self.table, &key) {
+                Ok(true) => true.into(),
+                _ => false.into(),
+            };
+            result.push(value);
+        }
+        result.into()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -189,5 +213,30 @@ mod tests {
 
         let res = dispatch(cmd, &store);
         assert_res_ok(res, &[Value::default(), Value::default()], &[]);
+    }
+
+    #[test]
+    fn hexist_should_work() {
+        let store = MemTable::new();
+        let cmd = CommandRequest::new_hset("score", "u1", 10.into());
+        dispatch(cmd, &store);
+        let cmd = CommandRequest::new_hexist("score", "u1");
+        let res = dispatch(cmd, &store);
+        assert_res_ok(res, &[true.into()], &[]);
+
+        let cmd = CommandRequest::new_hexist("score", "u2");
+        let res = dispatch(cmd, &store);
+        assert_res_ok(res, &[false.into()], &[]);
+    }
+    #[test]
+    fn hmexist_should_work() {
+        let store = MemTable::new();
+        let cmd = CommandRequest::new_hset("score", "u1", 10.into());
+        dispatch(cmd, &store);
+        let cmd = CommandRequest::new_hset("score", "u2", 8.into());
+        dispatch(cmd, &store);
+        let cmd = CommandRequest::new_hmexist("score", vec!["u1".into(), "u2".into(), "u3".into()]);
+        let res = dispatch(cmd, &store);
+        assert_res_ok(res, &[true.into(), true.into(), false.into()], &[]);
     }
 }

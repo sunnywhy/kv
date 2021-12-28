@@ -74,6 +74,26 @@ impl CommandRequest {
             })),
         }
     }
+
+    // create HEXIST command
+    pub fn new_hexist(table: impl Into<String>, key: impl Into<String>) -> Self {
+        Self {
+            request_data: Some(RequestData::Hexist(Hexist {
+                table: table.into(),
+                key: key.into(),
+            })),
+        }
+    }
+
+    // create HMEXIST command
+    pub fn new_hmexist(table: impl Into<String>, keys: Vec<String>) -> Self {
+        Self {
+            request_data: Some(RequestData::Hmexist(Hmexist {
+                table: table.into(),
+                keys,
+            })),
+        }
+    }
 }
 
 impl Kvpair {
@@ -108,6 +128,15 @@ impl From<i64> for Value {
     fn from(i: i64) -> Self {
         Self {
             value: Some(value::Value::Integer(i)),
+        }
+    }
+}
+
+/// convert to Value from bool
+impl From<bool> for Value {
+    fn from(b: bool) -> Self {
+        Self {
+            value: Some(value::Value::Bool(b)),
         }
     }
 }
