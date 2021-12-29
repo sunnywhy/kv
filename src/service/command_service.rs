@@ -53,7 +53,7 @@ impl CommandService for Hmset {
             match store.set(&self.table, pair.key, pair.value.unwrap_or_default()) {
                 Ok(Some(v)) => result.push(v),
                 Ok(None) => result.push(Value::default()),
-                Err(_) => result.push(Value::default())
+                Err(_) => result.push(Value::default()),
             }
         }
         result.into()
@@ -179,7 +179,13 @@ mod tests {
     #[test]
     fn hmset_should_work() {
         let store = MemTable::new();
-        let cmd = CommandRequest::new_hmset("t1", vec![Kvpair::new("hello", "world".into()), Kvpair::new("u1", 10.into())]);
+        let cmd = CommandRequest::new_hmset(
+            "t1",
+            vec![
+                Kvpair::new("hello", "world".into()),
+                Kvpair::new("u1", 10.into()),
+            ],
+        );
         let res = dispatch(cmd.clone(), &store);
         assert_res_ok(res, &[Value::default(), Value::default()], &[]);
 
