@@ -34,11 +34,11 @@ mod tests {
         test_get_all(store);
     }
 
-    // #[test]
-    // fn memtable_iter_should_work() {
-    //     let store = MemTable::new();
-    //     test_get_iter(store);
-    // }
+    #[test]
+    fn memtable_iter_should_work() {
+        let store = MemTable::new();
+        test_get_iter(store);
+    }
 
     fn test_basic_interface(store: impl Storage) {
         // first set will create the table, insert key, and return None
