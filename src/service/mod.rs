@@ -35,7 +35,6 @@ pub struct ServiceInner<Store> {
 }
 
 impl<Store: Storage> Service<Store> {
-
     pub fn execute(&self, cmd: CommandRequest) -> CommandResponse {
         debug!("Got request: {:?}", cmd);
         self.inner.on_received.notify(&cmd);
@@ -53,8 +52,8 @@ impl<Store: Storage> Service<Store> {
 
 impl<Store: Storage> ServiceInner<Store> {
     pub fn new(store: Store) -> Self {
-        Self { 
-            store, 
+        Self {
+            store,
             on_received: Vec::new(),
             on_executed: Vec::new(),
             on_before_send: Vec::new(),
@@ -191,12 +190,12 @@ mod tests {
             .fn_before_send(d)
             .fn_after_send(e)
             .into();
-        
-            let res = service.execute(CommandRequest::new_hset("t1", "k1", "v1".into()));
-            assert_eq!(res.status, StatusCode::CREATED.as_u16() as _);
-            assert_eq!(res.message, "");
-            assert_eq!(res.values, vec![Value::default()]);
-     }
+
+        let res = service.execute(CommandRequest::new_hset("t1", "k1", "v1".into()));
+        assert_eq!(res.status, StatusCode::CREATED.as_u16() as _);
+        assert_eq!(res.message, "");
+        assert_eq!(res.values, vec![Value::default()]);
+    }
 }
 
 #[cfg(test)]

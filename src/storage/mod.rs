@@ -19,21 +19,21 @@ pub trait Storage {
 }
 
 /// Storage iterator, then the implementation of the trait only needs to give their iterator to StorageIter.
-/// Then make sure the next() has type implements the Into<kvpair> 
+/// Then make sure the next() has type implements the Into<kvpair>
 pub struct StorageIter<T> {
     data: T,
 }
 
 impl<T> StorageIter<T> {
     pub fn new(data: T) -> Self {
-        Self{ data }
+        Self { data }
     }
 }
 
-impl<T> Iterator for StorageIter<T> 
-where 
+impl<T> Iterator for StorageIter<T>
+where
     T: Iterator,
-    T::Item: Into<Kvpair>
+    T::Item: Into<Kvpair>,
 {
     type Item = Kvpair;
 
