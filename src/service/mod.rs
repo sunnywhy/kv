@@ -38,9 +38,14 @@ impl<Store: Storage> Service<Store> {
 
     pub fn execute(&self, cmd: CommandRequest) -> CommandResponse {
         debug!("Got request: {:?}", cmd);
-        let res = dispatch(cmd, &self.inner.store);
+        self.inner.on_received.notify(&cmd);
+        let mut res = dispatch(cmd, &self.inner.store);
         debug!("Executed response: {:?}", res);
-        // TODO: emit on_executed event
+        self.inner.on_executed.notify(&res);
+        self.inner.on_before_send.notify(&mut res);
+        if !self.inner.on_before_send.is_empty() {
+            debug!("Modified response: {:?}", res);
+        }
 
         res
     }
@@ -82,6 +87,34 @@ impl<Store: Storage> From<ServiceInner<Store>> for Service<Store> {
     fn from(inner: ServiceInner<Store>) -> Self {
         Self {
             inner: Arc::new(inner),
+        }
+    }
+}
+
+/// event notification, unchangable event
+pub trait Notify<Arg> {
+    fn notify(&self, arg: &Arg);
+}
+
+/// event notification, changable event
+pub trait NotifyMut<Arg> {
+    fn notify(&self, arg: &mut Arg);
+}
+
+impl<Arg> Notify<Arg> for Vec<fn(&Arg)> {
+    #[inline]
+    fn notify(&self, arg: &Arg) {
+        for f in self {
+            f(arg)
+        }
+    }
+}
+
+impl<Arg> NotifyMut<Arg> for Vec<fn(&mut Arg)> {
+    #[inline]
+    fn notify(&self, arg: &mut Arg) {
+        for f in self {
+            f(arg)
         }
     }
 }
