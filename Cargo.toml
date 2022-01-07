@@ -12,6 +12,7 @@ thiserror = "1" # error defination and handling
 dashmap = "5" # concurrent hash map
 http = "0.2" # import this to use HTTP status code
 tracing = "0.1" # handle logging
+sled = "0.34" # sled db
 
 [dev-dependencies]
 anyhow = "1" # handle error
